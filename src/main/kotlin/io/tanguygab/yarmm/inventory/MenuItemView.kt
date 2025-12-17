@@ -14,7 +14,7 @@ import kotlin.text.split
 import kotlin.text.toIntOrNull
 
 class MenuItemView(
-    config: MenuItemConfig,
+    val config: MenuItemConfig,
     val slot: String,
     player: TabPlayer,
     val data: MenuData

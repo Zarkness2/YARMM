@@ -7,18 +7,16 @@ import me.neznamy.tab.shared.config.file.YamlConfigurationFile
 import org.bukkit.event.inventory.InventoryType
 import java.io.File
 
+private fun getActionGroup(list: Any?) = ActionGroup(ConditionalActions.INSTANCE.actionManager, list as List<*>? ?: emptyList<Any>())
+
 class MenuConfig(file: File, config: MainConfig) : YamlConfigurationFile(null, file) {
 
-    private val actionManager = ConditionalActions.INSTANCE.actionManager
-
-    val title = getString("title", "<red>No title set")!!
-    val rows = getInt("rows", 6)!!
+    val title = getString("title", null) ?: "<red>No title set"
+    val rows = getInt("rows", null) ?: 6
     val type = InventoryType.entries.find { it.name == getString("type", null) } ?: InventoryType.CHEST
 
-    val openActions = getActionGroup("open-actions")
-    val closeActions = getActionGroup("close-actions")
-
-    private fun getActionGroup(path: String) = ActionGroup(actionManager, getObject(path, emptyList<Any>()) as List<*>)
+    val openActions = getActionGroup(getObject("open-actions", null))
+    val closeActions = getActionGroup(getObject("close-actions",  null))
 
     val items = getMap<String, Any>("items").keys
         .map { getConfigurationSection("items.$it") }
@@ -31,6 +29,8 @@ class MenuItemConfig(val section: ConfigurationSection, config: MainConfig) {
     val amount = section.getString("amount") ?: "1"
     val lore = section.getStringList("lore")?.map { config.itemLorePrefix + it} ?: emptyList()
     val slots = getSlotRanges()
+
+    val clickActions = getActionGroup(section.getObject("click-actions") ?: emptyList<Any>())
 
     private fun getSlotRanges(): List<String> {
         val slots = section.getStringList("slots")?.toMutableList()

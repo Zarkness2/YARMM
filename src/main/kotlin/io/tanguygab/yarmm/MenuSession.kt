@@ -32,14 +32,15 @@ class MenuSession(
         refresh(player, true)
     }
 
-    fun close() {
-        if (!menu.config.closeActions.execute(player.bukkit)) return
+    fun close(force: Boolean = false): Boolean {
+        if (!menu.config.closeActions.execute(player.bukkit) && !force) return false
 
-        player.bukkit.closeInventory()
+        player.bukkit.scheduler.run(plugin, { player.bukkit.closeInventory() }, null)
         items.forEach {
             TAB.getInstance().featureManager.unregisterFeature("menu-item-${player.name}-${it.slot}")
         }
         TAB.getInstance().featureManager.unregisterFeature("menu-session-${player.name}")
+        return true
     }
 
     override fun refresh(player: TabPlayer, force: Boolean) {
@@ -48,7 +49,6 @@ class MenuSession(
             items.forEach { it.inventory = inventory }
 
             player.bukkit.scheduler.run(plugin, { player.bukkit.openInventory(inventory) }, null)
-
         }
     }
 }

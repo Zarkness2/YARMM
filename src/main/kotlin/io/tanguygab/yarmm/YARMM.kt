@@ -12,8 +12,8 @@ import org.bukkit.entity.Player
 import org.bukkit.event.HandlerList
 import org.bukkit.plugin.java.JavaPlugin
 
-val TabPlayer.bukkit
-    get() = player as Player
+val TabPlayer.bukkit get() = player as Player
+val Player.tab get() = TAB.getInstance().getPlayer(uniqueId)
 
 class YARMM : JavaPlugin() {
 
@@ -34,12 +34,13 @@ class YARMM : JavaPlugin() {
         config = MainConfig(getResource("config.yml"), dataFolder)
 
         menuManager = MenuManager(this)
-        menuManager.load()
 
         listOf(
-            InventoryListener(menuManager),
-            ActionsListener(menuManager)
+            InventoryListener(this),
+            ActionsListener(this)
         ).forEach { server.pluginManager.registerEvents(it, this) }
+
+        server.globalRegionScheduler.run(this) { menuManager.load() }
     }
 
     override fun onDisable() {
@@ -50,7 +51,7 @@ class YARMM : JavaPlugin() {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player && args.isNotEmpty() && args[0] in menuManager.menus) {
             val menu = menuManager.menus[args[0]]!!
-            menuManager.openMenu(TAB.getInstance().getPlayer(sender.uniqueId)!!, menu)
+            menuManager.openMenu(sender.tab!!, menu)
         }
         return true
     }

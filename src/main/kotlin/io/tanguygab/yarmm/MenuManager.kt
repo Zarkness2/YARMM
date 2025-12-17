@@ -2,6 +2,7 @@ package io.tanguygab.yarmm
 
 import io.tanguygab.yarmm.config.MenuConfig
 import io.tanguygab.yarmm.inventory.MenuInventory
+import me.neznamy.tab.shared.config.file.YamlConfigurationFile
 import me.neznamy.tab.shared.platform.TabPlayer
 import java.io.File
 
@@ -22,12 +23,15 @@ class MenuManager(val plugin: YARMM) {
     }
 
     fun load() {
-        plugin.saveResource("menus/default-menu.yml", false)
+        val folder = File(plugin.dataFolder, "menus")
+        if (!folder.exists()) {
+            YamlConfigurationFile(plugin.getResource("menus/default-menu.yml"), File(folder, "default-menu.yml"))
+        }
         loadFiles(plugin.dataFolder, "menus")
-
     }
     fun unload() {
-        sessions.values.forEach { it.close() }
+        sessions.values.forEach { it.close(true) }
+        sessions.clear()
     }
 
     fun openMenu(player: TabPlayer, menu: MenuInventory): MenuSession? {
@@ -37,7 +41,7 @@ class MenuManager(val plugin: YARMM) {
     }
 
     fun closeMenu(player: TabPlayer) {
-        sessions[player]?.close()
-        sessions.remove(player);
+        if (sessions[player]?.close() == true)
+            sessions.remove(player)
     }
 }
