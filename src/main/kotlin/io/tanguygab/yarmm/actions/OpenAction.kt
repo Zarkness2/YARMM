@@ -7,13 +7,15 @@ import io.tanguygab.yarmm.tab
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 
-class CloseAction(val yarmm: YARMM) : Action("^(?i)close") {
+class OpenAction(val yarmm: YARMM) : Action("^(?i)open:( )?") {
 
-    override fun getSuggestion() = "close"
+    override fun getSuggestion() = "open: <menu>"
 
     override fun execute(player: OfflinePlayer?, match: String) {
         if (player !is Player) return
-        player.tab?.let { yarmm.menuManager.closeMenu(it, MenuCloseReason.REOPEN) }
+        val menu = yarmm.menuManager.menus[parsePlaceholders(player, match)] ?: return
+
+        player.tab?.let { yarmm.menuManager.openMenu(it, menu) }
     }
 
 }

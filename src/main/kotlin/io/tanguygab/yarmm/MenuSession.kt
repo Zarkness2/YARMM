@@ -6,6 +6,8 @@ import me.neznamy.tab.shared.Property
 import me.neznamy.tab.shared.TAB
 import me.neznamy.tab.shared.features.types.RefreshableFeature
 import me.neznamy.tab.shared.platform.TabPlayer
+import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.inventory.Inventory
 
 class MenuSession(
     val plugin: YARMM,
@@ -18,6 +20,7 @@ class MenuSession(
 
     val data = MenuData(Property(this, player, menu.config.title))
 
+    lateinit var inventory: Inventory
     val items = mutableListOf<MenuItemView>()
 
     init {
@@ -32,23 +35,42 @@ class MenuSession(
         refresh(player, true)
     }
 
-    fun close(force: Boolean = false): Boolean {
-        if (!menu.config.closeActions.execute(player.bukkit) && !force) return false
+    fun TabPlayer.openInventory() {
+        bukkit.scheduler.run(plugin, { bukkit.openInventory(inventory) }, null)
+    }
+    fun TabPlayer.closeInventory() {
+        bukkit.scheduler.run(plugin, { bukkit.closeInventory(InventoryCloseEvent.Reason.DISCONNECT) }, null)
+    }
 
-        player.bukkit.scheduler.run(plugin, { player.bukkit.closeInventory() }, null)
-        items.forEach {
-            TAB.getInstance().featureManager.unregisterFeature("menu-item-${player.name}-${it.slot}")
+
+
+    fun close(reason: MenuCloseReason): Boolean {
+        if (reason != MenuCloseReason.UNLOAD && !menu.config.closeActions.execute(player.bukkit)) {
+            if (reason != MenuCloseReason.REOPEN) player.openInventory()
+            return false
         }
-        TAB.getInstance().featureManager.unregisterFeature("menu-session-${player.name}")
+
+        TAB.getInstance().featureManager.apply {
+            val usages = TAB.getInstance().placeholderManager.placeholderUsage.values
+            usages.forEach {
+                it.removeAll(items.toSet())
+                it.remove(this@MenuSession)
+            }
+            items.forEach { item -> unregisterFeature("menu-item-${player.name}-${item.slot}") }
+            unregisterFeature("menu-session-${player.name}")
+        }
+
+        // Prevent cursor position from resetting when changing menu
+        if (reason != MenuCloseReason.OPEN_NEW) player.closeInventory()
         return true
     }
 
     override fun refresh(player: TabPlayer, force: Boolean) {
         if (force || data.title.update()) {
-            val inventory = menu.get(player, data)
+            inventory = menu.get(player, data)
             items.forEach { it.inventory = inventory }
 
-            player.bukkit.scheduler.run(plugin, { player.bukkit.openInventory(inventory) }, null)
+            player.openInventory()
         }
     }
 }

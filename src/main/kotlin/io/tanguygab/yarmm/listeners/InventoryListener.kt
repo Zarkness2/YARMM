@@ -1,5 +1,6 @@
 package io.tanguygab.yarmm.listeners
 
+import io.tanguygab.yarmm.MenuCloseReason
 import io.tanguygab.yarmm.YARMM
 import io.tanguygab.yarmm.tab
 import org.bukkit.entity.Player
@@ -11,26 +12,43 @@ import org.bukkit.event.inventory.InventoryOpenEvent
 
 class InventoryListener(val plugin: YARMM) : Listener {
 
+    val sessions get() = plugin.menuManager.sessions
+
     @EventHandler
     fun onMenuOpen(e: InventoryOpenEvent) {
         val player = e.player
-        if (player !is Player) return
-        println("Open " + e.inventory)
+        if (player !is Player || player.tab !in sessions) return
+
+        if (e.inventory != sessions[player.tab]?.inventory)
+            plugin.menuManager.closeMenu(player.tab!!, MenuCloseReason.OPEN_NEW)
     }
 
     @EventHandler
     fun onMenuClose(e: InventoryCloseEvent) {
+        if (e.reason == InventoryCloseEvent.Reason.OPEN_NEW) return
+
         val player = e.player
-        if (player !is Player) return
-        println("Close " + e.inventory + " " + plugin.menuManager.sessions[player.tab])
+        if (player !is Player || player.tab !in sessions) return
+
+        val reason = when (e.reason) {
+            // Also called when YARMM closes the menu
+            InventoryCloseEvent.Reason.DISCONNECT -> {
+                // If closed inv is different from current session,
+                // YARMM opened a new menu (most likely from an OpenAction)
+                if (e.inventory != sessions[player.tab]?.inventory) return
+                MenuCloseReason.UNLOAD
+            }
+            else -> MenuCloseReason.PLAYER
+        }
+        plugin.menuManager.closeMenu(player.tab!!, reason)
     }
 
     @EventHandler
     fun onMenuClick(e: InventoryClickEvent) {
         val player = e.whoClicked
-        if (player !is Player || player.tab !in plugin.menuManager.sessions) return
+        if (player !is Player || player.tab !in sessions) return
         e.isCancelled = true
-        plugin.menuManager.sessions[player.tab]!!.items
+        sessions[player.tab]!!.items
             .findLast { it.getSlot() == e.rawSlot } // until priority is added
             ?.let { item -> plugin.server.asyncScheduler.runNow(plugin) { item.config.clickActions.execute(player) } }
     }
