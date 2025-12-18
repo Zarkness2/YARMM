@@ -2,6 +2,7 @@ package io.tanguygab.yarmm.config
 
 import io.github.tanguygab.conditionalactions.ConditionalActions
 import io.github.tanguygab.conditionalactions.actions.ActionGroup
+import io.github.tanguygab.conditionalactions.conditions.ConditionGroup
 import me.neznamy.tab.shared.config.file.ConfigurationSection
 import me.neznamy.tab.shared.config.file.YamlConfigurationFile
 import org.bukkit.event.inventory.InventoryType
@@ -31,6 +32,7 @@ class MenuItemConfig(val section: ConfigurationSection, config: MainConfig) {
     val slots = getSlotRanges()
 
     val clickActions = getActionGroup(section.getObject("click-actions") ?: emptyList<Any>())
+    val viewCondition = section.getString("view-condition")?.let { ConditionGroup(ConditionalActions.INSTANCE.conditionManager, it) }
 
     private fun getSlotRanges(): List<String> {
         val slots = section.getStringList("slots")?.toMutableList()

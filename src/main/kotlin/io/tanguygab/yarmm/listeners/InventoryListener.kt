@@ -48,8 +48,10 @@ class InventoryListener(val plugin: YARMM) : Listener {
         val player = e.whoClicked
         if (player !is Player || player.tab !in sessions) return
         e.isCancelled = true
-        sessions[player.tab]!!.items
-            .findLast { it.getSlot() == e.rawSlot } // until priority is added
+
+        val tab = player.tab!!
+        sessions[tab]!!.items
+            .findLast { it.getSlot() == e.rawSlot && it.isVisible() }
             ?.let { item -> plugin.server.asyncScheduler.runNow(plugin) { item.config.clickActions.execute(player) } }
     }
 

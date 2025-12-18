@@ -30,6 +30,7 @@ class MenuItemView(
         }
 
     fun getSlot() = data.slots[this]!!.get().toIntOrNull() ?: 0
+    fun isVisible() = (data.viewConditions[this]?.get() ?: "true") == "true"
 
     init {
         IdentityHashMap<MutableMap<MenuItemView, Property>, String>().apply {
@@ -38,16 +39,22 @@ class MenuItemView(
                 data.materials to config.material,
                 data.amounts to config.amount,
                 data.names to config.name,
-                data.lores to config.lore.joinToString("\n"))
-            )
+                data.lores to config.lore.joinToString("\n"),
+
+            ))
+            if (config.viewCondition != null) put(data.viewConditions, "%ca-condition:${config.viewCondition.name}%")
         }.forEach { (map, raw) -> map[this] = Property(this, player, raw.replace("{slot}", slot)) }
         refresh(player, true)
     }
 
     override fun refresh(player: TabPlayer, force: Boolean) {
         val oldSlot = getSlot()
-        if (data.slots[this]!!.update() && inventory?.getItem(oldSlot) == item) {
-            inventory?.setItem(oldSlot, null)
+
+        data.viewConditions[this]?.update()
+        val visible = isVisible()
+
+        if ((data.slots[this]!!.update() || !visible) && inventory?.getItem(oldSlot) == item) {
+            inventory?.setItem(oldSlot, null) // need to add back old item if there's one
         }
 
         val material = data.materials[this]!!
@@ -65,8 +72,7 @@ class MenuItemView(
                 lore(if (lore.get().isEmpty()) listOf() else lore.get().split("\n").map { mm.deserialize(it) })
             }
         }
-
-        inventory?.setItem(getSlot(), item)
+        if (visible) inventory?.setItem(getSlot(), item)
     }
 
     companion object {
