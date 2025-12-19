@@ -26,7 +26,7 @@ class MenuSession(
     init {
         menu.config.items.forEach { item ->
             item.slots.forEach { slot ->
-                val i = MenuItemView(item, slot, player, data)
+                val i = MenuItemView(item, slot, this)
                 items.add(i)
                 TAB.getInstance().featureManager.registerFeature("menu-item-${player.name}-${slot}", i)
             }

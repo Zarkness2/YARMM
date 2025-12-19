@@ -1,6 +1,7 @@
 package io.tanguygab.yarmm.inventory
 
 import io.tanguygab.yarmm.MenuData
+import io.tanguygab.yarmm.MenuSession
 import io.tanguygab.yarmm.config.MenuItemConfig
 import me.neznamy.tab.shared.Property
 import me.neznamy.tab.shared.features.types.RefreshableFeature
@@ -16,11 +17,12 @@ import kotlin.text.toIntOrNull
 class MenuItemView(
     val config: MenuItemConfig,
     val slot: String,
-    player: TabPlayer,
-    val data: MenuData
+    val session: MenuSession
 ): RefreshableFeature() {
     override fun getFeatureName() = "YARMM"
     override fun getRefreshDisplayName() = "Updating menu items"
+
+    val data get() = session.data
 
     var item = ItemStack(Material.STONE)
     var inventory: Inventory? = null
@@ -43,8 +45,8 @@ class MenuItemView(
 
             ))
             if (config.viewCondition != null) put(data.viewConditions, "%ca-condition:${config.viewCondition.name}%")
-        }.forEach { (map, raw) -> map[this] = Property(this, player, raw.replace("{slot}", slot)) }
-        refresh(player, true)
+        }.forEach { (map, raw) -> map[this] = Property(this, session.player, raw.replace("{slot}", slot)) }
+        refresh(session.player, true)
     }
 
     override fun refresh(player: TabPlayer, force: Boolean) {
@@ -54,7 +56,7 @@ class MenuItemView(
         val visible = isVisible()
 
         if ((data.slots[this]!!.update() || !visible) && inventory?.getItem(oldSlot) == item) {
-            inventory?.setItem(oldSlot, null) // need to add back old item if there's one
+            inventory?.setItem(oldSlot, session.items.findLast { it.getSlot() == oldSlot && it.isVisible() }?.item)
         }
 
         val material = data.materials[this]!!
