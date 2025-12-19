@@ -1,8 +1,10 @@
 package io.tanguygab.yarmm.listeners
 
 import io.tanguygab.yarmm.MenuCloseReason
+import io.tanguygab.yarmm.ThreadPlaceholder
 import io.tanguygab.yarmm.YARMM
 import io.tanguygab.yarmm.tab
+import me.neznamy.tab.shared.TAB
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -13,6 +15,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent
 class InventoryListener(val plugin: YARMM) : Listener {
 
     val sessions get() = plugin.menuManager.sessions
+    val clickPlaceholder = TAB.getInstance().placeholderManager.registerPlaceholder(ThreadPlaceholder("%click%"))!!
 
     @EventHandler
     fun onMenuOpen(e: InventoryOpenEvent) {
@@ -52,7 +55,13 @@ class InventoryListener(val plugin: YARMM) : Listener {
         val tab = player.tab!!
         sessions[tab]!!.items
             .findLast { it.getSlot() == e.rawSlot && it.isVisible() }
-            ?.let { item -> plugin.server.asyncScheduler.runNow(plugin) { item.config.clickActions.execute(player) } }
+            ?.let { item -> plugin.server.asyncScheduler.runNow(plugin) {
+                Thread.currentThread().let {
+                    clickPlaceholder.updateValue(e.click.name)
+                    item.config.clickActions.execute(player)
+                    clickPlaceholder.updateValue(null)
+                }
+            } }
     }
 
 //    @EventHandler
