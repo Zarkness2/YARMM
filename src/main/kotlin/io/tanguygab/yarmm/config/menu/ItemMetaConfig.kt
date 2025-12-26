@@ -12,15 +12,17 @@ import org.bukkit.NamespacedKey
 import org.bukkit.inventory.meta.ItemMeta
 import kotlin.reflect.KClass
 
+fun <T : Keyed> String.getFromRegistry(registryKey: RegistryKey<T>): T? {
+    val key = NamespacedKey.fromString(lowercase()) ?: return null
+    return RegistryAccess.registryAccess().getRegistry(registryKey).get(key)
+}
+fun <T : Keyed> Property.getFromRegistry(registryKey: RegistryKey<T>) = get().getFromRegistry(registryKey)
+
 abstract class ItemMetaConfig(private val clazz: KClass<out ItemMeta>) {
     abstract fun storeData(item: MenuItemView, player: TabPlayer): Map<String, Property>
     abstract fun refresh(meta: ItemMeta, data: Map<String, Property>, force: Boolean)
 
     fun isMeta(meta: ItemMeta) = clazz.isInstance(meta)
-    protected fun <T : Keyed> getFromRegistry(registryKey: RegistryKey<T>, property: Property): T? {
-        val key = NamespacedKey.fromString(property.get().lowercase()) ?: return null
-        return RegistryAccess.registryAccess().getRegistry(registryKey).get(key)
-    }
 
     companion object {
         fun property(item: MenuItemView, player: TabPlayer, value: String) = Property(item, player, value)

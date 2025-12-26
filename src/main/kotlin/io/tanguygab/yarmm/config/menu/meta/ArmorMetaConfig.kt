@@ -2,6 +2,7 @@ package io.tanguygab.yarmm.config.menu.meta
 
 import io.papermc.paper.registry.RegistryKey
 import io.tanguygab.yarmm.config.menu.ItemMetaConfig
+import io.tanguygab.yarmm.config.menu.getFromRegistry
 import io.tanguygab.yarmm.inventory.MenuItemView
 import me.neznamy.tab.shared.Property
 import me.neznamy.tab.shared.config.file.ConfigurationSection
@@ -27,8 +28,8 @@ class ArmorMetaConfig(section: ConfigurationSection) : ItemMetaConfig(ArmorMeta:
         val material = data["material"]!!
         val pattern = data["pattern"]!!
         if (material.update().or(pattern.update()) || force) {
-            val trimMaterial = getFromRegistry(RegistryKey.TRIM_MATERIAL, material)
-            val trimPattern = getFromRegistry(RegistryKey.TRIM_PATTERN, pattern)
+            val trimMaterial = material.getFromRegistry(RegistryKey.TRIM_MATERIAL)
+            val trimPattern = pattern.getFromRegistry(RegistryKey.TRIM_PATTERN)
 
             if (trimMaterial != null && trimPattern != null)
                 (meta as ArmorMeta).trim = ArmorTrim(trimMaterial, trimPattern)
