@@ -75,6 +75,20 @@ class YARMM : JavaPlugin() {
                                 openMenu(it, args)
                             }
             ))))
+            .then(Commands.literal("info")
+                .executes {
+                    fun version(plugin: String) = server.pluginManager.getPlugin(plugin)?.pluginMeta?.version
+                    it.source.sender.sendRichMessage("<dark_gray><strikethrough>                                                    </strikethrough>\n" +
+                            "<green>YARMM<gray>: <gold>${pluginMeta.version}\n" +
+                            "<green>ConditionalActions<gray>: <gold>${version("ConditionalActions")}\n" +
+                            "<red>TAB<gray>: <gold>${version("TAB")}\n" +
+                            "<aqua>PlaceholderAPI<gray>: <gold>${version("PlaceholderAPI")}\n" +
+                            "\n" +
+                            "<gray>${menuManager.menus.size} Menus:</gray> ${menuManager.menus.keys.joinToString(", ")} \n" +
+                            "<dark_gray><strikethrough>                                                    </strikethrough>\n")
+                    Command.SINGLE_SUCCESS
+                }
+            )
 
         lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) {
             it.registrar().register(command.build(), listOf("menumanager", "mm", "menus"))
