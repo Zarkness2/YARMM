@@ -1,8 +1,8 @@
 package io.tanguygab.yarmm
 
+import io.github.tanguygab.conditionalactions.hook.tab.ArgPlaceholders
 import io.tanguygab.yarmm.config.MenuConfig
 import io.tanguygab.yarmm.inventory.MenuInventory
-import me.neznamy.tab.shared.TAB
 import me.neznamy.tab.shared.config.file.YamlConfigurationFile
 import me.neznamy.tab.shared.placeholders.types.PlayerPlaceholderImpl
 import me.neznamy.tab.shared.platform.TabPlayer
@@ -13,9 +13,7 @@ class MenuManager(val plugin: YARMM) {
     val menus = mutableMapOf<String, MenuInventory>()
     val sessions = mutableMapOf<TabPlayer, MenuSession>()
 
-    lateinit var argsPlaceholder: PlayerPlaceholderImpl
-    lateinit var argsSizePlaceholder: PlayerPlaceholderImpl
-    val argPlaceholders = mutableListOf<PlayerPlaceholderImpl>()
+    lateinit var argPlaceholders: ArgPlaceholders<PlayerPlaceholderImpl>
 
     private fun loadFiles(folder: File, name: String) {
         File(folder, name).listFiles().forEach {
@@ -35,31 +33,15 @@ class MenuManager(val plugin: YARMM) {
         }
         loadFiles(plugin.dataFolder, "menus")
 
-        TAB.getInstance().placeholderManager.apply {
-            argsPlaceholder = registerPlayerPlaceholder("%menu-args%", -1) { "" }
-            argsSizePlaceholder = registerPlayerPlaceholder("%menu-args-size%", -1) { "0" }
+
+        argPlaceholders = object : ArgPlaceholders<PlayerPlaceholderImpl>("menu-") {
+            override fun new(identifier: String, default: String) = PlayerPlaceholderImpl(identifier, -1) { default }
+            override fun update(placeholder: PlayerPlaceholderImpl, player: TabPlayer?, value: String) = placeholder.updateValue(player!!, value)
         }
     }
     fun unload() {
         sessions.values.forEach { it.close(MenuCloseReason.UNLOAD) }
         sessions.clear()
-    }
-
-    fun updatePlaceholders(player: TabPlayer, args: List<String>) {
-        argsPlaceholder.updateValue(player, args.joinToString(" "))
-        argsSizePlaceholder.updateValue(player, args.size.toString())
-        args.forEachIndexed { index, arg ->
-            val placeholder = if (index < argPlaceholders.size) argPlaceholders[index]
-            else TAB.getInstance().placeholderManager.registerPlayerPlaceholder("%menu-arg-$index%", -1) { "" }.let {
-                argPlaceholders.add(it)
-                it
-            }
-            placeholder.updateValue(player, arg)
-        }
-        if (args.size < argPlaceholders.size) argPlaceholders.forEachIndexed { index, placeholder ->
-            if (index >= args.size)
-            placeholder.updateValue(player, "")
-        }
     }
 
     fun openMenu(player: TabPlayer, menu: MenuInventory, args: List<String> = emptyList()): MenuSession? {
@@ -71,7 +53,7 @@ class MenuManager(val plugin: YARMM) {
             return null
         }
 
-        updatePlaceholders(player, args)
+        argPlaceholders.update(player, args)
         return MenuSession(plugin, player, menu).apply { sessions[player] = this }
     }
 
@@ -80,7 +62,7 @@ class MenuManager(val plugin: YARMM) {
         if (sessions[player]?.close(reason) != true) return false
         if (reason === MenuCloseReason.OPEN_NEW) return true
 
-        updatePlaceholders(player, emptyList())
+        argPlaceholders.update(player)
         sessions.remove(player)
         return true
     }

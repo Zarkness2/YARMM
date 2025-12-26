@@ -1,7 +1,7 @@
 package io.tanguygab.yarmm.listeners
 
 import io.tanguygab.yarmm.MenuCloseReason
-import io.tanguygab.yarmm.ThreadPlaceholder
+import io.github.tanguygab.conditionalactions.hook.tab.ThreadPlaceholder
 import io.tanguygab.yarmm.YARMM
 import io.tanguygab.yarmm.tab
 import me.neznamy.tab.shared.TAB
