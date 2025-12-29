@@ -47,13 +47,14 @@ class MenuManager(val plugin: YARMM) {
     fun openMenu(player: TabPlayer, menu: MenuInventory, args: List<String> = emptyList()): MenuSession? {
         if (!closeMenu(player, MenuCloseReason.OPEN_NEW)) return sessions[player]
 
+        argPlaceholders.update(player, args)
         if (!menu.config.openActions.execute(player.bukkit)) {
             sessions[player]?.close(MenuCloseReason.UNLOAD)
+            argPlaceholders.update(player, args)
             sessions.remove(player)
             return null
         }
 
-        argPlaceholders.update(player, args)
         return MenuSession(plugin, player, menu).apply { sessions[player] = this }
     }
 

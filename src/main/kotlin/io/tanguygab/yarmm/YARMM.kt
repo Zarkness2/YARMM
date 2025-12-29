@@ -4,7 +4,6 @@ import com.mojang.brigadier.Command
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.context.CommandContext
-import io.github.tanguygab.conditionalactions.ConditionalActions
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
@@ -20,7 +19,6 @@ import me.neznamy.tab.api.TabPlayer
 import me.neznamy.tab.api.event.plugin.TabLoadEvent
 import me.neznamy.tab.shared.TAB
 import me.neznamy.tab.shared.config.file.YamlConfigurationFile
-import org.bukkit.command.ConsoleCommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.HandlerList
 import org.bukkit.plugin.java.JavaPlugin
