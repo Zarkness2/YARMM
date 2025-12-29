@@ -9,7 +9,7 @@ import org.bukkit.Bukkit
 import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.Inventory
 
-class MenuInventory(val config: MenuConfig) {
+class MenuInventory(val name: String, val config: MenuConfig) {
     fun get(player: TabPlayer, data: MenuData): Inventory {
         val title = MiniMessage.miniMessage().deserialize(data.title.get())
 

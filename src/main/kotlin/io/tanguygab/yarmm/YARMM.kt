@@ -1,5 +1,8 @@
 package io.tanguygab.yarmm
 
+import com.google.common.io.CharStreams
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
@@ -23,6 +26,10 @@ import org.bukkit.entity.Player
 import org.bukkit.event.HandlerList
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URI
+import java.nio.charset.StandardCharsets
 import kotlin.math.max
 import kotlin.math.min
 
@@ -92,7 +99,24 @@ class YARMM : JavaPlugin() {
             )
             .then(Commands.literal("share")
                 .then(Commands.argument("menu", MenuArgumentType(this))
-                    .executes {
+                    .executes { ctx ->
+                        val menu = ctx.getArgument("menu", MenuInventory::class.java).name
+                        val menuFile = File(dataFolder, "menus/$menu.yml")
+
+                        (URI("${PASTE_URL}documents").toURL().openConnection() as HttpURLConnection).apply {
+                            requestMethod = "POST"
+                            setRequestProperty("Content-Type", "text/plain; charset=utf-8")
+                            doOutput = true
+                            connect()
+
+                            getOutputStream().use { it.write(menuFile.readBytes()) }
+
+                            getInputStream().use {
+                                val json = CharStreams.toString(InputStreamReader(it, StandardCharsets.UTF_8))
+                                val key = gson.fromJson(json, JsonObject::class.java)["key"].asString
+                                ctx.source.sender.sendRichMessage("<green>Menu shared at <click:open_url:\"$PASTE_URL$key\">$PASTE_URL$key</click> !")
+                            }
+                        }
                         Command.SINGLE_SUCCESS
                     }
                 )
@@ -147,4 +171,8 @@ class YARMM : JavaPlugin() {
         menuManager.unload()
     }
 
+    companion object {
+        const val PASTE_URL = "https://paste.helpch.at/"
+        val gson = Gson()
+    }
 }
