@@ -3,7 +3,6 @@ package io.tanguygab.yarmm.config.menu
 import io.github.tanguygab.conditionalactions.ConditionalActions
 import io.github.tanguygab.conditionalactions.actions.ActionGroup
 import io.github.tanguygab.conditionalactions.conditions.ConditionGroup
-import io.tanguygab.yarmm.config.MainConfig
 import me.neznamy.tab.shared.config.file.ConfigurationSection
 
 data class MenuItemConfig(
@@ -14,7 +13,7 @@ data class MenuItemConfig(
     val slots: List<String>,
 
     val clickActions: ActionGroup,
-    val viewCondition: ConditionGroup?,
+    val displayCondition: ConditionGroup?,
 
     val enchantments: Map<String, String>,
     val metas: List<ItemMetaConfig>
@@ -28,7 +27,7 @@ data class MenuItemConfig(
             slots = getSlotRanges(section),
 
             clickActions = getActionGroup(section.getObject("click-actions") ?: emptyList<Any>()),
-            viewCondition = section.getString("view-condition")?.let { ConditionGroup(ConditionalActions.INSTANCE.conditionManager, it) },
+            displayCondition = section.getString("display-condition")?.let { ConditionGroup(ConditionalActions.INSTANCE.conditionManager, it) },
 
             enchantments = section.getMap<String, Any>("enchantments")
                 ?.map { (key, value) -> key to value.toString() }

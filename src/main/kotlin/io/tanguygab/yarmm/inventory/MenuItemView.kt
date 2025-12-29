@@ -33,7 +33,7 @@ class MenuItemView(
         }
 
     fun getSlot() = data.slots[this]!!.get().toIntOrNull() ?: 0
-    fun isVisible() = (data.viewConditions[this]?.get() ?: "true") == "true"
+    fun isVisible() = (data.displayConditions[this]?.get() ?: "true") == "true"
 
     init {
         IdentityHashMap<MutableMap<MenuItemView, Property>, String>().apply {
@@ -44,7 +44,7 @@ class MenuItemView(
                 data.names to config.name,
                 data.lores to config.lore.joinToString("\n"),
             ))
-            if (config.viewCondition != null) put(data.viewConditions, "%ca-condition:${config.viewCondition.name}%")
+            if (config.displayCondition != null) put(data.displayConditions, "%ca-condition:${config.displayCondition.name}%")
         }.forEach { (map, raw) -> map[this] = Property(this, session.player, raw.replace("{slot}", slot)) }
 
         val enchantments = mutableMapOf<Property, Property>()
@@ -64,7 +64,7 @@ class MenuItemView(
         if (player !== session.player) return
         val oldSlot = getSlot()
 
-        data.viewConditions[this]?.update()
+        data.displayConditions[this]?.update()
         val visible = isVisible()
 
         if ((data.slots[this]!!.update() || !visible) && inventory?.getItem(oldSlot) == item) {
@@ -96,7 +96,7 @@ class MenuItemView(
                 displayName(if (name.get().isEmpty()) null else mm.deserialize(session.plugin.config.itemNamePrefix + name.get()))
             }
             if (force || lore.update()) {
-                lore(if (lore.get().isEmpty()) listOf() else lore.get().split("\n").map { mm.deserialize(session.plugin.config.itemNamePrefix + it) })
+                lore(if (lore.get().isEmpty()) listOf() else lore.get().split("\n").map { mm.deserialize(session.plugin.config.itemLorePrefix + it) })
             }
             config.metas
                 .filter { it.isMeta(this) }

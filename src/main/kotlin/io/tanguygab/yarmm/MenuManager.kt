@@ -15,24 +15,22 @@ class MenuManager(val plugin: YARMM) {
 
     lateinit var argPlaceholders: ArgPlaceholders<PlayerPlaceholderImpl>
 
-    private fun loadFiles(folder: File, name: String) {
-        File(folder, name).listFiles().forEach {
-            if (it.isDirectory) {
-                loadFiles(it, it.name)
-                return
-            }
-            if (!it.name.endsWith(".yml")) return
-            val name = it.name.substringBeforeLast(".yml")
-            menus[name] = MenuInventory(name, MenuConfig.fromFile(it))
+    private fun loadFiles(file: File, path: String) {
+        if (file.isDirectory) {
+            file.listFiles().forEach { loadFiles(it, "$path${file.name}/") }
+            return
         }
+        if (!file.name.endsWith(".yml")) return
+        val name = (if (plugin.config.includeFilePath) path.substringAfter("menus/") else "") + file.name.substringBeforeLast(".yml")
+        menus[name] = MenuInventory(name, MenuConfig.fromFile(file))
     }
 
     fun load() {
-        val folder = File(plugin.dataFolder, "menus")
+        val folder = plugin.dataFolder.resolve( "menus")
         if (!folder.exists()) {
             YamlConfigurationFile(plugin.getResource("menus/default-menu.yml"), File(folder, "default-menu.yml"))
         }
-        loadFiles(plugin.dataFolder, "menus")
+        loadFiles(folder, "")
 
 
         argPlaceholders = object : ArgPlaceholders<PlayerPlaceholderImpl>("menu-") {

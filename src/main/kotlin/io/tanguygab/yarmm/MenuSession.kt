@@ -84,7 +84,7 @@ data class MenuData(
     val names: MutableMap<MenuItemView, Property> = mutableMapOf(),
     val lores: MutableMap<MenuItemView, Property> = mutableMapOf(),
     val slots: MutableMap<MenuItemView, Property> = mutableMapOf(),
-    val viewConditions: MutableMap<MenuItemView, Property> = mutableMapOf(),
+    val displayConditions: MutableMap<MenuItemView, Property> = mutableMapOf(),
     val enchantments: MutableMap<MenuItemView, Map<Property, Property>> = mutableMapOf(),
     val meta: MutableMap<MenuItemView, Map<ItemMetaConfig, Map<String, Property>>> = mutableMapOf(),
 )

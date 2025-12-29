@@ -15,6 +15,7 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import io.tanguygab.yarmm.commands.MenuArgumentType
 import io.tanguygab.yarmm.config.LangConfig
 import io.tanguygab.yarmm.config.MainConfig
+import io.tanguygab.yarmm.converter.DeluxeMenusConverter
 import io.tanguygab.yarmm.inventory.MenuInventory
 import io.tanguygab.yarmm.listeners.ActionsListener
 import io.tanguygab.yarmm.listeners.InventoryListener
@@ -41,6 +42,9 @@ class YARMM : JavaPlugin() {
     lateinit var menuManager: MenuManager
     lateinit var config: MainConfig
     lateinit var lang: LangConfig
+    val converters = mapOf(
+        "DeluxeMenus" to DeluxeMenusConverter()
+    )
 
     private fun getMenuPage(ctx: CommandContext<CommandSourceStack>, page: Int): Int {
         val max = Math.ceilDiv(menuManager.menus.size, config.listMaxEntries)
@@ -135,6 +139,22 @@ class YARMM : JavaPlugin() {
                     it.source.sender.sendRichMessage("<green>${menus.size} menu commands generated!")
                     Command.SINGLE_SUCCESS
                 }
+            )
+            .then(Commands.literal("convert")
+                .then(Commands.argument("plugin", StringArgumentType.word())
+                    .suggests { _, builder ->
+                        converters.keys.forEach{ builder.suggest(it) }
+                        builder.buildFuture()
+                    }
+                    .executes {
+                        val plugin = it.getArgument("plugin", String::class.java)
+                        val converter = converters[plugin]!!
+                        it.source.sender.sendRichMessage(
+                            if (converter.convert()) "<green>$plugin menus converted!"
+                            else "<red>$plugin folder not found!"
+                        )
+                        Command.SINGLE_SUCCESS
+                    })
             )
 
         lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) {

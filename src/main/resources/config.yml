@@ -2,3 +2,5 @@ item-name-prefix: "<white>"
 item-lore-prefix: "<gray><underlined:false>"
 
 list-max-entries: 10
+
+include-file-path: true
