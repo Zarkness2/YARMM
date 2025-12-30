@@ -1,7 +1,6 @@
 package io.tanguygab.yarmm.actions
 
 import io.github.tanguygab.conditionalactions.actions.Action
-import io.tanguygab.yarmm.MenuCloseReason
 import io.tanguygab.yarmm.YARMM
 import io.tanguygab.yarmm.tab
 import org.bukkit.OfflinePlayer
@@ -13,9 +12,10 @@ class OpenAction(val yarmm: YARMM) : Action("^(?i)open:( )?") {
 
     override fun execute(player: OfflinePlayer?, match: String) {
         if (player !is Player) return
-        val menu = yarmm.menuManager.menus[parsePlaceholders(player, match)] ?: return
+        val args = parsePlaceholders(player, match).split(" ")
+        val menu = yarmm.menuManager.menus[args[0]] ?: return
 
-        player.tab?.let { yarmm.menuManager.openMenu(it, menu) }
+        player.tab?.let { yarmm.menuManager.openMenu(it, menu, args.subList(1, args.size)) }
     }
 
 }
