@@ -44,12 +44,18 @@ abstract class ItemMetaConfig(private val clazz: KClass<out ItemMeta>) {
         )
 
         val types = mutableMapOf(
-            "armor" to ArmorMetaConfig::class,
+            "tooltip" to TooltipMetaConfig::class,
+            "model" to ModelMetaConfig::class,
+
             "instrument" to InstrumentMetaConfig::class,
             "head" to SkullMetaConfig::class,
+            "damage" to DamageableMetaConfig::class,
+            "light-level" to LightMetaConfig::class,
+
+            "armor" to ArmorMetaConfig::class,
             "book" to BookMetaConfig::class,
             "compass" to CompassMetaConfig::class,
-            "damage" to DamageableMetaConfig::class,
+            "potion" to PotionMetaConfig::class,
 
             "firework-star" to FireworkStarMetaConfig::class,
             "firework" to FireworkMetaConfig::class,
@@ -57,14 +63,8 @@ abstract class ItemMetaConfig(private val clazz: KClass<out ItemMeta>) {
             "patterns" to BannerMetaConfig::class,
             "shield-color" to ShieldMetaConfig::class,
 
-//            "CrossbowMeta" to null,
-//            "BundleMeta" to null
-
-            "potion" to PotionMetaConfig::class,
-            "light-level" to LightMetaConfig::class,
-
-            "tooltip" to TooltipMetaConfig::class,
-            "model" to ModelMetaConfig::class,
+            "projectiles" to CrossbowMetaConfig::class,
+            "inventory" to BundleMetaConfig::class
         )
         fun fromItem(item: ConfigurationSection) = types
             .filter { it.key in item.keys }
