@@ -1,5 +1,6 @@
 package io.tanguygab.yarmm.converter
 
+import io.github.tanguygab.conditionalactions.Utils
 import me.neznamy.tab.shared.config.file.ConfigurationSection
 import me.neznamy.tab.shared.config.file.YamlConfigurationFile
 import org.bukkit.Bukkit
@@ -10,19 +11,12 @@ abstract class PluginConverter(val folder: String, private val itemsSection: Str
     fun convert(): Boolean {
         val folder = Bukkit.getPluginsFolder().resolve(folder)
         if (folder.exists()) {
-            convertFiles(folder.parentFile)
+            Utils.loadFiles(folder.parentFile, "") { file, _ ->
+                convertFile(file, Bukkit.getPluginsFolder().resolve("YARMM/menus/converted/$file"))
+            }
             return true
         }
         return false
-    }
-
-    private fun convertFiles(file: File) {
-        if (file.isDirectory) {
-            file.listFiles().forEach { convertFiles(it) }
-            return
-        }
-        if (!file.name.endsWith(".yml")) return
-        convertFile(file, Bukkit.getPluginsFolder().resolve("YARMM/menus/converted/$file"))
     }
 
     private fun convertFile(input: File, output: File): YamlConfigurationFile {
