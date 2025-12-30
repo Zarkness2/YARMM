@@ -133,7 +133,7 @@ class YARMM : JavaPlugin() {
                     val yaml = YamlConfigurationFile(null, file)
 
                     val menus = menuManager.menus.keys.filter { menu -> menu !in yaml.values.keys }
-                    menus.forEach { menu -> yaml[menu] = mapOf("actions" to listOf("console: yarmm open %player% $menu %conditionalactions_args%")) }
+                    menus.forEach { menu -> yaml[menu] = mapOf("actions" to listOf("open: $menu %conditionalactions_args%")) }
                     server.dispatchCommand(it.source.sender, "conditionalactions reload")
 
                     it.source.sender.sendRichMessage("<green>${menus.size} menu commands generated!")
