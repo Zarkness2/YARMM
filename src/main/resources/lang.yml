@@ -13,3 +13,7 @@ commands:
     success: "<green>Successfully generated commands for menus based on their names."
 
   help:
+
+prompt:
+  default: "<gray>Enter a <prompt>"
+  no-value: "-"

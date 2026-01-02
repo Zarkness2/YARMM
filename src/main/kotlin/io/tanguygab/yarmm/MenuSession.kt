@@ -22,6 +22,7 @@ class MenuSession(
     val data = MenuData(Property(this, player, menu.config.title))
 
     lateinit var inventory: Inventory
+    var closed: MenuCloseReason? = null
     val items: List<MenuItemView>
 
     init {
@@ -42,6 +43,7 @@ class MenuSession(
     }
 
     fun TabPlayer.openInventory() {
+        if (closed != null) return
         bukkit.scheduler.run(plugin, { bukkit.openInventory(inventory) }, null)
     }
     fun TabPlayer.closeInventory() {
@@ -49,14 +51,26 @@ class MenuSession(
         bukkit.scheduler.run(plugin, { bukkit.closeInventory(InventoryCloseEvent.Reason.DISCONNECT) }, null)
     }
 
+    fun reopen() {
+        closed = null
+        player.openInventory()
+    }
 
 
     fun close(reason: MenuCloseReason): Boolean {
+        if (closed != null) return false
+        if (reason == MenuCloseReason.PROMPT) {
+            closed = reason
+            player.closeInventory()
+            return false
+        }
+
         if (reason != MenuCloseReason.UNLOAD && !menu.config.closeActions.execute(player.bukkit)) {
             if (reason != MenuCloseReason.REOPEN) player.openInventory()
             return false
         }
 
+        closed = reason
         TAB.getInstance().featureManager.apply {
             val usages = TAB.getInstance().placeholderManager.placeholderUsage.values
             usages.forEach {
@@ -73,7 +87,7 @@ class MenuSession(
     }
 
     override fun refresh(player: TabPlayer, force: Boolean) {
-        if (player === this.player && (force || data.title.update())) {
+        if (player === this.player && (data.title.update() || force)) {
             inventory = menu.get(player, data)
             items.forEach { it.inventory = inventory }
 

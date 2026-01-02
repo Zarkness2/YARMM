@@ -2,8 +2,7 @@ package io.tanguygab.yarmm.listeners
 
 import io.github.tanguygab.conditionalactions.events.ActionsRegisterEvent
 import io.tanguygab.yarmm.YARMM
-import io.tanguygab.yarmm.actions.CloseAction
-import io.tanguygab.yarmm.actions.OpenAction
+import io.tanguygab.yarmm.actions.*
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
@@ -14,6 +13,7 @@ class ActionsListener(val plugin: YARMM) : Listener {
         e.addActions(
             CloseAction(plugin),
             OpenAction(plugin),
+            PromptAction(plugin),
         )
     }
 

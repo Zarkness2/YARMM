@@ -37,4 +37,7 @@ class LangConfig(plugin: YARMM) : YamlConfigurationFile(
             .clickEvent(ClickEvent.runCommand("/yarmm open $player $menu"))
             .insertion("/yarmm open $player $menu")
     }
+
+    fun getPromptDefault(prompt: String) = get("prompt.default", Placeholder.unparsed("prompt", prompt))
+    val promptNoValue = getString("prompt.no-value", "-")
 }

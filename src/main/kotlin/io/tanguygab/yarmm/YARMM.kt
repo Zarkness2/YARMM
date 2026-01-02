@@ -19,6 +19,7 @@ import io.tanguygab.yarmm.converter.DeluxeMenusConverter
 import io.tanguygab.yarmm.inventory.MenuInventory
 import io.tanguygab.yarmm.listeners.ActionsListener
 import io.tanguygab.yarmm.listeners.InventoryListener
+import io.tanguygab.yarmm.listeners.PlayerListener
 import me.neznamy.tab.api.TabPlayer
 import me.neznamy.tab.api.event.plugin.TabLoadEvent
 import me.neznamy.tab.shared.TAB
@@ -40,6 +41,7 @@ class YARMM : JavaPlugin() {
     lateinit var menuManager: MenuManager
     lateinit var config: MainConfig
     lateinit var lang: LangConfig
+    lateinit var playerListener: PlayerListener
     val converters = mapOf(
         "DeluxeMenus" to DeluxeMenusConverter(this)
     )
@@ -183,7 +185,8 @@ class YARMM : JavaPlugin() {
 
         listOf(
             InventoryListener(this),
-            ActionsListener(this)
+            ActionsListener(this),
+            PlayerListener(this).also { playerListener = it }
         ).forEach { server.pluginManager.registerEvents(it, this) }
 
         server.globalRegionScheduler.run(this) {

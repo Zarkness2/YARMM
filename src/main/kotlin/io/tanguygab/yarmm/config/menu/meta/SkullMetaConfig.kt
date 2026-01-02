@@ -24,6 +24,7 @@ class SkullMetaConfig(val head: String) : ItemMetaConfig(SkullMeta::class) {
 
         val head = data["head"]!!
         if (head.update() || force) {
+            if (head.get().contains("%")) return
             val skin = TAB.getInstance().configuration.skinManager.getSkin(head.get().trim())
             if (skin == null) {
                 meta.playerProfile = null
