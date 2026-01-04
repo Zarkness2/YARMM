@@ -84,9 +84,6 @@ class MenuItemView(
             item.addItemFlags(*config.flags.toTypedArray())
         }
 
-        val amount = data.amounts[this]!!
-        if (force || amount.update()) item.amount = amount.get().toIntOrNull() ?: 1
-
         data.enchantments[this]!!.forEach { (enchant, level) ->
             val old = enchant.get()
             if (!enchant.update().or(level.update()) && !force) return@forEach
@@ -99,10 +96,15 @@ class MenuItemView(
         }
 
         item.itemMeta = item.itemMeta.apply {
+            setMaxStackSize(99)
             config.metas
                 .filter { it.isMeta(this) }
                 .forEach { it.refresh(this, data.meta[this@MenuItemView]!![it]!!, force) }
         }
+
+        val amount = data.amounts[this]!!
+        if (force || amount.update()) item.amount = amount.get().toIntOrNull() ?: 1
+
         if (session.items.findLast { it.getSlot() == getSlot() && it.isVisible() } == this) inventory?.setItem(getSlot(), item)
     }
 

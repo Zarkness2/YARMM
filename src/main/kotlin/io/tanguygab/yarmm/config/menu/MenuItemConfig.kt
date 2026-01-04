@@ -22,7 +22,7 @@ data class MenuItemConfig(
     companion object {
         fun fromSection(section: ConfigurationSection) = MenuItemConfig(
             material = section.getString("material") ?: "STONE",
-            amount = section.getString("amount") ?: "1",
+            amount = section.getObject("amount")?.toString() ?: "1",
             slots = getSlotRanges(section),
 
             clickCooldown = section.getObject("click-cooldown")?.toString() ?: "-1",
