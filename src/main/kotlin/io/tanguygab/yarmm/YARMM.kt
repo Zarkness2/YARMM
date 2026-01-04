@@ -66,6 +66,21 @@ class YARMM : JavaPlugin() {
         return Command.SINGLE_SUCCESS
     }
 
+    internal fun generateCommands(commands: Collection<String>, menu: String?, overwrite: Boolean) {
+        val ca = server.pluginManager.getPlugin("ConditionalActions")!!
+        val file = File(ca.dataFolder, "commands/yarmm.yml")
+        if (!file.exists()) file.createNewFile()
+        val yaml = YamlConfigurationFile(null, file)
+
+        if (menu == null) commands
+            .filter { overwrite || it !in yaml.values.keys }
+            .forEach { yaml[it] = mapOf("actions" to listOf("open: $it %conditionalactions_args%")) }
+        else yaml[commands.first()] = mapOf(
+            "aliases" to commands.filter { !commands.first().equals(it, true) },
+            "actions" to listOf("open: $menu %conditionalactions_args%")
+        )
+    }
+
     override fun onEnable() {
         INSTANCE = this
         val command = Commands.literal("yarmm")
@@ -133,13 +148,8 @@ class YARMM : JavaPlugin() {
             .then(Commands.literal("generate-commands")
                 .requires { it.sender.hasPermission("yarmm.command.generate-commands") }
                 .executes {
-                    val ca = server.pluginManager.getPlugin("ConditionalActions")!!
-                    val file = File(ca.dataFolder, "commands/yarmm.yml")
-                    if (!file.exists()) file.createNewFile()
-                    val yaml = YamlConfigurationFile(null, file)
-
-                    val menus = menuManager.menus.keys.filter { menu -> menu !in yaml.values.keys }
-                    menus.forEach { menu -> yaml[menu] = mapOf("actions" to listOf("open: $menu %conditionalactions_args%")) }
+                    val menus = menuManager.menus.keys
+                    generateCommands(menus, null, false)
                     server.dispatchCommand(it.source.sender, "conditionalactions reload")
 
                     it.source.sender.sendRichMessage("<green>${menus.size} menu commands generated!")
@@ -155,9 +165,14 @@ class YARMM : JavaPlugin() {
                     }
                     .executes {
                         val plugin = it.getArgument("plugin", String::class.java)
-                        val converter = converters[plugin]!!
+                        val converter = converters[plugin]
+                        
                         it.source.sender.sendRichMessage(
-                            if (converter.convert()) "<green>$plugin menus converted!"
+                            if (converter == null) "<red>$plugin not found!"
+                            else if (converter.convert()) {
+                                server.dispatchCommand(it.source.sender, "conditionalactions reload")
+                                "<green>$plugin menus converted!"
+                            }
                             else "<red>$plugin folder not found!"
                         )
                         Command.SINGLE_SUCCESS

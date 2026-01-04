@@ -5,7 +5,7 @@ import me.neznamy.tab.shared.config.file.ConfigurationSection
 import me.neznamy.tab.shared.config.file.YamlConfigurationFile
 import org.bukkit.Color
 
-class DeluxeMenusConverter(plugin: YARMM) : PluginConverter(plugin, "DeluxeMenus/gui_menus", "items") {
+class DeluxeMenusConverter(private val plugin: YARMM) : PluginConverter(plugin, "DeluxeMenus/gui_menus", "items") {
 
     override val rgbPattern = "&(?<rgb>#[0-9a-fA-F]{6})".toRegex()
 
@@ -27,7 +27,14 @@ class DeluxeMenusConverter(plugin: YARMM) : PluginConverter(plugin, "DeluxeMenus
         output["type"] = input.getString("inventory_type", null)
         output["open-actions"] = convertActions(input.getStringList("open_commands", null) ?: listOf(), args, input.getMap<String, Any>("open_requirement")).ifEmpty { null }
         output["close-actions"] = convertActions(input.getStringList("close_commands", null) ?: listOf(), args, input.getMap<String, Any>("open_requirement")).ifEmpty { null }
-        // open_command?
+
+        val openCommand = input.getObject("open_command", null)
+        if (openCommand != null) {
+            val commands = (openCommand as? List<*> ?: listOf(openCommand)).map { it.toString() }
+            plugin.generateCommands(commands, output.file.path
+                .substringAfter("YARMM/menus/")
+                .substringBeforeLast(".yml"), true)
+        }
     }
 
     override fun convertItem(input: ConfigurationSection, output: YamlConfigurationFile, path: String, args: Map<String, String>) {
