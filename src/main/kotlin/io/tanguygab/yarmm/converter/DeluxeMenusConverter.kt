@@ -111,7 +111,7 @@ class DeluxeMenusConverter(plugin: YARMM) : PluginConverter(plugin, "DeluxeMenus
         val type = input.substringAfter("[").substringBefore("]").lowercase()
         val arg = input.substringAfter("]").convert(args).trim()
         return when (type) {
-            "console", "player", "chat" -> "$type: $arg"
+            "console", "player", "chat", "placeholder" -> "$type: $arg"
             "commandevent" -> "player: $arg"
             "message", "minimessage", "json" -> "message: $arg"
             "broadcast", "minibroadcast", "jsonbroadcast", "broadcastjson" -> "broadcast: $arg"
@@ -126,10 +126,12 @@ class DeluxeMenusConverter(plugin: YARMM) : PluginConverter(plugin, "DeluxeMenus
             "takemoney", "givemoney" -> "console: eco ${type.substring(0, 4)} %player% $arg"
             "takeexp", "giveexp" -> "console: xp add %player% ${if (type == "takeexp") "-" else ""}${arg.removeSuffix("L").removeSuffix("l")} ${if (arg.endsWith("l", ignoreCase = true)) "levels" else "points" }"
             "takepermission", "givepermission" -> "${type.substring(0, 4)}-permission: $arg"
+            "log" -> {
+                val args = arg.split(" ", limit = 2)
+                "log:${args[0]}: ${args[1]}"
+            }
 
-            "placeholder" -> "not implemented"
             "meta" -> "not implemented" // Will be added to CA
-            "log" -> "not implemented"
             else -> "unknown action \"$input\""
         }
     }
@@ -185,11 +187,11 @@ class DeluxeMenusConverter(plugin: YARMM) : PluginConverter(plugin, "DeluxeMenus
             }
             ">=", ">", "<", "<=", "==", "!=" -> "$input0 $type $output"
             "javascript" -> type
+            "regexmatches" -> "${input["regex"]} =r= $input"
+            "isobject" -> "$input is ${input["object"]}"
 
             "hasmeta" -> "not implemented" // Will be added to CA
-            "regexmatches" -> "not implemented" // Will be Added to CA
-            "isobject" -> "not implemented" // idk
-            else -> "unknown requirement\"$input0\""
+            else -> "unknown requirement \"$input0\""
         }
     }
 
