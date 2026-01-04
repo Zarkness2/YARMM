@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture
 class MenuArgumentType(val plugin: YARMM) : CustomArgumentType.Converted<MenuInventory, String> {
     override fun convert(nativeType: String) = plugin.menuManager.menus[nativeType]!!
 
-    override fun getNativeType() = StringArgumentType.word()!!
+    override fun getNativeType() = StringArgumentType.string()!!
 
     override fun <S: Any> listSuggestions(
         context: CommandContext<S>,
@@ -20,6 +20,7 @@ class MenuArgumentType(val plugin: YARMM) : CustomArgumentType.Converted<MenuInv
     ): CompletableFuture<Suggestions> {
         plugin.menuManager.menus.keys
             .filter { it.startsWith(builder.remainingLowerCase) }
+            .map { if (it.matches("[A-Za-z0-9_\\-+.]+".toRegex())) it else "\"$it\"" }
             .forEach { builder.suggest(it) }
         return builder.buildFuture()
     }
