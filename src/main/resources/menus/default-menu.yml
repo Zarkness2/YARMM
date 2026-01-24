@@ -20,6 +20,7 @@ items:
       - condition: "permission:reward.diamond"
         allow: "message: <red>Already claimed"
         deny:
+          - "give-perm: reward.diamond"
           - "message: <green>Here you go!"
           - "console: give %player% diamond 1"
   close:
