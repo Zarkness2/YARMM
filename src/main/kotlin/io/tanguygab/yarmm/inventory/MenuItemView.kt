@@ -79,7 +79,8 @@ class MenuItemView(
         }
 
         val material = data.materials[this]!!
-        if (force || material.update()) {
+        val materialUpdate = material.update()
+        if (force || materialUpdate) {
             item = ItemStack(Material.getMaterial(material.get().uppercase()) ?: Material.STONE)
             item.addItemFlags(*config.flags.toTypedArray())
         }
@@ -99,7 +100,7 @@ class MenuItemView(
             setMaxStackSize(99)
             config.metas
                 .filter { it.isMeta(this) }
-                .forEach { it.refresh(this, data.meta[this@MenuItemView]!![it]!!, force) }
+                .forEach { it.refresh(this, data.meta[this@MenuItemView]!![it]!!, force || materialUpdate) }
         }
 
         val amount = data.amounts[this]!!

@@ -19,14 +19,17 @@ class DamageableMetaConfig(section: ConfigurationSection) : ItemMetaConfig(Damag
 
     override fun refresh(meta: ItemMeta, data: Map<String, Property>, force: Boolean) {
         meta as Damageable
-        val value = data["value"]!!
-        if (value.update() || force) meta.damage = value.get().toIntOrNull() ?: 0
-
         val max = data["max"]!!
-        if (max.update() || force) {
+        val maxUpdate = max.update();
+        if (maxUpdate || force) {
             val m = max.get().toIntOrNull() ?: 0
             if (m == -1) meta.resetDamage()
             meta.setMaxDamage(m)
+        }
+        val value = data["value"]!!
+        if (value.update() || force || maxUpdate) {
+            val v = value.get().toIntOrNull()
+            meta.damage = v?.coerceAtMost(if (meta.hasMaxDamage()) meta.maxDamage else 0) ?: 0
         }
     }
 

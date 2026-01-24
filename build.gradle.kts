@@ -14,7 +14,7 @@ repositories {
 dependencies {
     compileOnly(libs.paper)
     compileOnly(libs.conditionalactions)
-    compileOnly(files("../../dependencies/TAB.jar"))
+    compileOnly(files("../../dependencies/TAB-5.5.0.jar"))
 }
 
 kotlin {
